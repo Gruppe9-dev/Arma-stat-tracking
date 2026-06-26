@@ -1,0 +1,43 @@
+# Environment and secrets
+.env
+.env.*
+!.env.example
+*.local
+*.secret
+grp9_stats_server.toml
+**/grp9_stats_server.toml
+!*.example.toml
+
+# Node / TypeScript
+node_modules/
+dist/
+coverage/
+*.tsbuildinfo
+npm-debug.log*
+
+# Docker / database
+postgres-data/
+backups/
+
+# Arma / HEMTT
+.hemttout/
+*.pbo
+*.bisign
+*.biprivatekey
+*.bikey
+*.rpt
+*.log
+
+# Native extension builds
+extension/**/target/
+extension/**/build/
+extension/**/dist/
+*.dll
+*.so
+*.dylib
+*.lib
+*.pdb
+
+# Runtime storage
+storage/
+queue.ndjson

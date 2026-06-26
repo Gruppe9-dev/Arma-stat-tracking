@@ -1,0 +1,6 @@
+api_base_url = "http://127.0.0.1:3000"
+server_key = "main"
+machine_token = "change_me"
+queue_path = "storage/queue.ndjson"
+connect_timeout_ms = 2000
+request_timeout_ms = 5000
