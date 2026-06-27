@@ -39,6 +39,29 @@ fn read_c_string(value: *const c_char) -> String {
     unsafe { CStr::from_ptr(value).to_string_lossy().to_string() }
 }
 
+fn decode_sqf_string_literal(value: &str) -> String {
+    let trimmed = value.trim();
+    if !trimmed.starts_with('"') || !trimmed.ends_with('"') || trimmed.len() < 2 {
+        return value.to_string();
+    }
+
+    let inner = &trimmed[1..trimmed.len() - 1];
+    let mut decoded = String::with_capacity(inner.len());
+    let mut chars = inner.chars().peekable();
+
+    while let Some(ch) = chars.next() {
+        if ch == '"' && chars.peek() == Some(&'"') {
+            decoded.push('"');
+            chars.next();
+            continue;
+        }
+
+        decoded.push(ch);
+    }
+
+    decoded
+}
+
 fn read_args(argv: *const *const c_char, argc: c_int) -> Vec<String> {
     if argv.is_null() {
         return Vec::new();
@@ -48,6 +71,7 @@ fn read_args(argv: *const *const c_char, argc: c_int) -> Vec<String> {
     (0..argc)
         .map(|index| unsafe { *argv.add(index) })
         .map(read_c_string)
+        .map(|arg| decode_sqf_string_literal(&arg))
         .collect()
 }
 
@@ -126,9 +150,52 @@ fn post_json(path: &str, body: &str) -> String {
     }
 }
 
+fn get_api_status() -> String {
+    let config = match load_config() {
+        Ok(config) => config,
+        Err(error) => return json_error("config_error", &error),
+    };
+
+    let url = format!("{}/health", config.api_base_url.trim_end_matches('/'));
+    let connect_timeout = Duration::from_millis(config.connect_timeout_ms.unwrap_or(2000));
+    let request_timeout = Duration::from_millis(config.request_timeout_ms.unwrap_or(5000));
+    let agent = ureq::AgentBuilder::new()
+        .timeout_connect(connect_timeout)
+        .timeout(request_timeout)
+        .build();
+
+    match agent.get(&url).call() {
+        Ok(response) => {
+            let status = response.status();
+            let body = response.into_string().unwrap_or_else(|error| {
+                json_error("response_read_error", &error.to_string())
+            });
+
+            json!({
+                "ok": (200..300).contains(&status),
+                "status": status,
+                "body": body
+            })
+            .to_string()
+        }
+        Err(ureq::Error::Status(status, response)) => {
+            let response_body = response.into_string().unwrap_or_default();
+            json!({
+                "ok": false,
+                "error": "backend_status_error",
+                "status": status,
+                "body": response_body
+            })
+            .to_string()
+        }
+        Err(error) => json_error("request_error", &error.to_string()),
+    }
+}
+
 fn handle_command(command: &str, args: &[String]) -> String {
     match command {
         "health" => "{\"ok\":true,\"extension\":\"grp9_stats_ext\"}".to_string(),
+        "api_status" => get_api_status(),
         "operation_start" => {
             let Some(payload) = args.first() else {
                 return json_error("missing_payload", "operation_start requires payload JSON as first argument");

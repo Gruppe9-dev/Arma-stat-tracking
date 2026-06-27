@@ -32,6 +32,12 @@ private _payload = createHashMapFromArray [
 ];
 
 private _payloadJson = [_payload] call grp9_stats_fnc_jsonStringify;
+diag_log format [
+    "[grp9_stats] Finish payload JSON prepared. length=%1 preview=%2",
+    count _payloadJson,
+    _payloadJson select [0, 240]
+];
+
 private _callExtension = missionNamespace getVariable ["grp9_stats_server_fnc_callExtension", {}];
 private _result = ["operation_finish", [_operationId, _payloadJson]] call _callExtension;
 private _resultBody = if (_result isEqualType []) then {_result param [0, ""]} else {_result};
