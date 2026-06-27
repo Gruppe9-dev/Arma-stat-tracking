@@ -3,15 +3,15 @@
 .env
 .env.*
 
-**\node_modules
-**\dist
-**\.hemttout
-**\target
-**\storage
-**\*.pbo
-**\*.bisign
-**\*.bikey
-**\*.dll
+**/node_modules
+**/dist
+**/.hemttout
+**/target
+**/storage
+**/*.pbo
+**/*.bisign
+**/*.bikey
+**/*.dll
 
 addons
 docs
