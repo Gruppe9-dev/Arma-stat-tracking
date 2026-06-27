@@ -1,5 +1,5 @@
 use serde::Deserialize;
-use serde_json::json;
+use serde_json::{json, Value};
 use std::ffi::{c_char, c_int, CStr};
 use std::fs;
 use std::ptr;
@@ -78,6 +78,17 @@ fn load_config() -> Result<Config, String> {
 }
 
 fn post_json(path: &str, body: &str) -> String {
+    if let Err(error) = serde_json::from_str::<Value>(body) {
+        return json!({
+            "ok": false,
+            "error": "invalid_json_payload",
+            "message": error.to_string(),
+            "body_length": body.len(),
+            "body_preview": body.chars().take(240).collect::<String>()
+        })
+        .to_string();
+    }
+
     let config = match load_config() {
         Ok(config) => config,
         Err(error) => return json_error("config_error", &error),

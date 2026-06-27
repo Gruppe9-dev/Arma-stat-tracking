@@ -8,4 +8,8 @@ if (_args isEqualType "") then {
 if !(_args isEqualType []) exitWith {[false, "invalid_args"]};
 
 private _result = "grp9_stats_ext" callExtension [_command, _args];
+if (_result isEqualType [] && {count _result > 0}) exitWith {
+    _result select 0
+};
+
 _result

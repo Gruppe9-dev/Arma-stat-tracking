@@ -22,6 +22,7 @@ class CfgFunctions {
             class buildPlayerSnapshot {};
             class buildAttendanceRecords {};
             class buildScoreboardStats {};
+            class jsonStringify {};
         };
     };
 };

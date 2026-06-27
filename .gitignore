@@ -18,6 +18,7 @@ npm-debug.log*
 # Docker / database
 postgres-data/
 backups/
+mods/
 
 # Arma / HEMTT
 .hemttout/

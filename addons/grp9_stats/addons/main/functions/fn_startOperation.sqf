@@ -59,7 +59,7 @@ private _payload = createHashMapFromArray [
     ["players", _playerSnapshots]
 ];
 
-private _payloadJson = toJSON _payload;
+private _payloadJson = [_payload] call grp9_stats_fnc_jsonStringify;
 private _callExtension = missionNamespace getVariable ["grp9_stats_server_fnc_callExtension", {}];
 private _result = ["operation_start", [_payloadJson]] call _callExtension;
 private _resultBody = if (_result isEqualType []) then {_result param [0, ""]} else {_result};

@@ -25,6 +25,14 @@ app.setErrorHandler((error, _request, reply) => {
     });
   }
 
+  const httpError = error as { statusCode?: number; code?: string; message?: string };
+  if (typeof httpError.statusCode === "number" && httpError.statusCode >= 400 && httpError.statusCode < 500) {
+    return reply.code(httpError.statusCode).send({
+      error: httpError.code ?? "bad_request",
+      message: httpError.message ?? "Bad request"
+    });
+  }
+
   app.log.error(error);
   return reply.code(500).send({ error: "internal_server_error" });
 });
